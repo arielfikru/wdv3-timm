@@ -1,84 +1,49 @@
 # wdv3-timm
 
-small example thing showing how to use `timm` to run the WD Tagger V3 models.
+A small example demonstrating how to use `timm` for running the WD Tagger V3 models, with added functionality for batch processing images within directories, including optional recursion through subdirectories.
 
 ## How To Use
 
-1. clone the repository and enter the directory:
-```sh
-git clone https://github.com/neggles/wdv3-timm.git
+1. Clone the repository and navigate to the directory:
+```
+git clone https://github.com/arielfikru/wdv3-timm.git
 cd wd3-timm
 ```
 
-2. Create a virtual environment and install the Python requirements.
+2. Create a virtual environment and install the required Python packages.
 
-If you're using Linux, you can use the provided script:
-```sh
+For Linux users, a script is provided for ease of setup:
+```
 bash setup.sh
 ```
 
-Or if you're on Windows (or just want to do it manually), you can do the following:
-```sh
-# Create virtual environment
-python3.10 -m venv .venv
-# Activate it
+Windows users (or those preferring manual setup) can follow these instructions:
+```
+# Create the virtual environment
+python -m venv .venv
+# Activate the environment
 source .venv/bin/activate
-# Upgrade pip/setuptools/wheel
+# Update pip, setuptools, and wheel
 python -m pip install -U pip setuptools wheel
-# At this point, optionally you can install PyTorch manually (e.g. if you are not using an nVidia GPU)
+# Optionally, manually install PyTorch (e.g., for non-nVidia GPU users)
 python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-# Install requirements
+# Install the remaining requirements
 python -m pip install -r requirements.txt
 ```
 
-3. Run the example script, picking one of the 3 models to use:
-```sh
-python wdv3_timm.py <swinv2|convnext|vit> path/to/image.png
+3. To run the script, select one of the 3 models and provide an image file or a directory as input. The script can now process all images within a directory and optionally includes images within subdirectories.
+```
+python wdv3_timm.py --model <swinv2|convnext|vit> --gen_threshold <between 0.0 to 1.0> --char_threshold <between 0.0 to 1.0> <path/to/input, can be image or dir path> --recursive=True
 ```
 
-Example output from `python wdv3_timm.py vit a_picture_of_ganyu.png`:
-```sh
-Loading model 'vit' from 'SmilingWolf/wd-vit-tagger-v3'...
-Loading tag list...
-Creating data transform...
-Loading image and preprocessing...
-Running inference...
-Processing results...
---------
-Caption: 1girl, horns, solo, bell, ahoge, colored_skin, blue_skin, neck_bell, looking_at_viewer, purple_eyes, upper_body, blonde_hair, long_hair, goat_horns, blue_hair, off_shoulder, sidelocks, bare_shoulders, alternate_costume, shirt, black_shirt, cowbell, ganyu_(genshin_impact)
---------
-Tags: 1girl, horns, solo, bell, ahoge, colored skin, blue skin, neck bell, looking at viewer, purple eyes, upper body, blonde hair, long hair, goat horns, blue hair, off shoulder, sidelocks, bare shoulders, alternate costume, shirt, black shirt, cowbell, ganyu \(genshin impact\)
---------
-Ratings:
-  general: 0.827
-  sensitive: 0.199
-  questionable: 0.001
-  explicit: 0.001
---------
-Character tags (threshold=0.75):
-  ganyu_(genshin_impact): 0.991
---------
-General tags (threshold=0.35):
-  1girl: 0.996
-  horns: 0.950
-  solo: 0.947
-  bell: 0.918
-  ahoge: 0.897
-  colored_skin: 0.881
-  blue_skin: 0.872
-  neck_bell: 0.854
-  looking_at_viewer: 0.817
-  purple_eyes: 0.734
-  upper_body: 0.615
-  blonde_hair: 0.609
-  long_hair: 0.607
-  goat_horns: 0.524
-  blue_hair: 0.496
-  off_shoulder: 0.472
-  sidelocks: 0.470
-  bare_shoulders: 0.464
-  alternate_costume: 0.437
-  shirt: 0.427
-  black_shirt: 0.417
-  cowbell: 0.415
+Example output for `python wdv3_timm.py --model "vit" --gen_threshold=0.3 --char_threshold 0.6 "./animuData" --recursive=True` might look like this:
 ```
+Processing image: path/to/directory/image1.png
+Saved tags to image1.txt
+Processing image: path/to/directory/subdirectory/image2.jpg
+Saved tags to image2.txt
+...
+Done!
+```
+
+The output files (`image1.txt`, `image2.txt`, etc.) contain a unique set of tags for each image, effectively demonstrating the script's capability to handle large sets of images efficiently and autonomously.
