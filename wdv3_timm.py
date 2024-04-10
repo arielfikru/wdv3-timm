@@ -65,21 +65,14 @@ def get_tags(probs: Tensor, labels: LabelData, gen_threshold: float, char_thresh
     probs = probs.cpu().numpy()
     probs = list(zip(labels.names, probs))
 
-    rating_labels = dict([probs[i] for i in labels.rating])
+    rating_labels = {probs[i][0].replace("_", " "): probs[i][1] for i in labels.rating}
+    gen_labels = {probs[i][0].replace("_", " "): probs[i][1] for i in labels.general if probs[i][1] > gen_threshold}
+    char_labels = {probs[i][0].replace("_", " "): probs[i][1] for i in labels.character if probs[i][1] > char_threshold}
 
-    gen_labels = [probs[i] for i in labels.general]
-    gen_labels = dict([x for x in gen_labels if x[1] > gen_threshold])
-    gen_labels = dict(sorted(gen_labels.items(), key=lambda item: item[1], reverse=True))
+    combined_names = list(gen_labels.keys()) + list(char_labels.keys())
+    combined_names = list(set(combined_names)) 
 
-    char_labels = [probs[i] for i in labels.character]
-    char_labels = dict([x for x in char_labels if x[1] > char_threshold])
-    char_labels = dict(sorted(char_labels.items(), key=lambda item: item[1], reverse=True))
-
-    char_labels_str = ", ".join([x[0] for x in char_labels])
-    gen_labels_str = ", ".join([x[0] for x in gen_labels])
-    merged = f"{char_labels_str}, {gen_labels_str}" if char_labels_str else gen_labels_str
-    merged_list = list(set(merged.split(", ")))
-    final_caption = ", ".join(filter(None, merged_list))
+    final_caption = ", ".join(combined_names)
     
     return final_caption
 
