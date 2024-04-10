@@ -62,15 +62,25 @@ def load_labels_hf(repo_id: str, revision: Optional[str] = None, token: Optional
     return tag_data
 
 def get_tags(probs: Tensor, labels: LabelData, gen_threshold: float, char_threshold: float):
-    probs = list(zip(labels.names, probs.numpy()))
+    probs = probs.cpu().numpy()
+    probs = list(zip(labels.names, probs))
+
     rating_labels = dict([probs[i] for i in labels.rating])
-    gen_labels = [probs[i] for i in labels.general if probs[i][1] > gen_threshold]
-    char_labels = [probs[i] for i in labels.character if probs[i][1] > char_threshold]
+
+    gen_labels = [probs[i] for i in labels.general]
+    gen_labels = dict([x for x in gen_labels if x[1] > gen_threshold])
+    gen_labels = dict(sorted(gen_labels.items(), key=lambda item: item[1], reverse=True))
+
+    char_labels = [probs[i] for i in labels.character]
+    char_labels = dict([x for x in char_labels if x[1] > char_threshold])
+    char_labels = dict(sorted(char_labels.items(), key=lambda item: item[1], reverse=True))
+
     char_labels_str = ", ".join([x[0] for x in char_labels])
     gen_labels_str = ", ".join([x[0] for x in gen_labels])
     merged = f"{char_labels_str}, {gen_labels_str}" if char_labels_str else gen_labels_str
     merged_list = list(set(merged.split(", ")))
     final_caption = ", ".join(filter(None, merged_list))
+    
     return final_caption
 
 @dataclass
